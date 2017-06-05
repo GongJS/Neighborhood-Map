@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>  
+</head>
+<body>
+    <div class="container">
+      <div class="options-box">
+        <h1>Find Your New NYC Home</h1>
+         <div>
+            <input id="text-input" type="text">
+            <input id="yes-button" type="button" value="确定">
+         </div>
+      </div>   
+   </div>
+   <div id="map"></div>
+    <script type="text/javascript">
+    //定义一个map
+    var map;
+    var markers = [];
+    //初始化函数
+    function initMap(){
+        var styles = [
+          {
+            featureType: 'water',
+            stylers: [
+              { color: '#19a0d8' }
+            ]
+          },{
+            featureType: 'administrative',
+            elementType: 'labels.text.stroke',
+            stylers: [
+              { color: '#ffffff' },
+              { weight: 6 }
+            ]
+          },{
+            featureType: 'administrative',
+            elementType: 'labels.text.fill',
+            stylers: [
+              { color: '#e85113' }
+            ]
+          },{
+            featureType: 'road.highway',
+            elementType: 'geometry.stroke',
+            stylers: [
+              { color: '#efe9e4' },
+              { lightness: -40 }
+            ]
+          },{
+            featureType: 'transit.station',
+            stylers: [
+              { weight: 9 },
+              { hue: '#e85113' }
+            ]
+          },{
+            featureType: 'road.highway',
+            elementType: 'labels.icon',
+            stylers: [
+              { visibility: 'off' }
+            ]
+          },{
+            featureType: 'water',
+            elementType: 'labels.text.stroke',
+            stylers: [
+              { lightness: 100 }
+            ]
+          },{
+            featureType: 'water',
+            elementType: 'labels.text.fill',
+            stylers: [
+              { lightness: -100 }
+            ]
+          },{
+            featureType: 'poi',
+            elementType: 'geometry',
+            stylers: [
+              { visibility: 'on' },
+              { color: '#f0e4d3' }
+            ]
+          },{
+            featureType: 'road.highway',
+            elementType: 'geometry.fill',
+            stylers: [
+              { color: '#efe9e4' },
+              { lightness: -25 }
+            ]
+          }
+        ];
+        map = new google.maps.Map(document.getElementById('map'),{
+            //设定地图显示的中心
+            center:{
+                lat:39.131101838799914,
+                lng:117.23467800000006
+            },
+            //设置缩放值
+            zoom:13,
+            styles: styles,
+            mapTypeControl: false
+        });
+        //定义一个点
+        // var latlng = {
+        //     lat:39.131101838799914,
+        //     lng:117.23467800000006
+        // };
+        //定义一个标记
+        // var marker = new google.maps.Marker({
+        //     map:map,
+        //     position:latlng
+        // });
+        //定义一个信息窗口
+        // var infowindow = new google.maps.InfoWindow({
+        //     content:'this is my beautiful campus'
+        // });
+        //为信息窗口绑定事件处理
+        // marker.addListener('click',function(){
+        //     infowindow.open(map,marker);
+        // });
+        var largeInfowindow = new google.maps.InfoWindow();
+        //创建两个标记图标
+        var defaultIcon = makeMarkerIcon('0091ff');
+        var highlightedIcon = makeMarkerIcon('FFFF24');
+        var bounds = new google.maps.LatLngBounds();
+        //方案第二步：定义locations数组并将数组内所有地点在地图上显示出来
+        var locations = [
+            {title:'TJPU',location:{lat:39.131101838799914,lng:117.23467800000006}},
+            {title:'TJTU',location:{lat:39.058711697752436,lng:117.13552848346717}},
+            {title:'兰州，乔胖的故乡',location:{lat:36.03,lng:103.73}},
+            {title:'我的大锦州',location:{lat:41.13,lng:121.15}},
+            {title:'徐州',location:{lat:34.26,lng:117.20}},
+            {title:'烟花三月下扬州',location:{lat:32.39,lng:119.42}},
+            {title:'chinatown changzhou',location:{lat:31.79,lng:119.95}},
+            {title:'反正是江苏的一个州，我也忘了叫啥州',location:{lat:32.49,lng:119.90}},
+            {title:'还没去过苏州，小学课本里的苏州园林那么美',location:{lat:31.32,lng:120.62}},
+            {title:'稻城亚丁--去过的最美的地方',location:{lat:28.53829,lng:100.31584999999995}},
+            {title:'中国首都',location:{lat:39.90071,lng:116.39212999999995}},
+            {title:'魔都',location:{lat:31.18331495056,lng:121.43657326690004}}
+        ]
+        //进入循环，将数组遍历并为每个元素进行赋值
+        for(var i=0;i<locations.length;i++){
+            position = locations[i].location;
+            title = locations[i].title;
+            var marker = new google.maps.Marker({
+                map:map,
+                position:position,
+                title:title,
+                animation:google.maps.Animation.DROP,
+                icon: defaultIcon,
+                id:i
+            });
+            //将新建的标记实例保存到数组中
+            markers.push(marker);
+            //添加事件侦听
+            marker.addListener('click',function(){
+                populateInfowindow(this,largeInfowindow);
+            });
+            //调整缩放时地图的边界
+            bounds.extend(markers[i].position);
+
+            //两个事件监听，一个是mouseover一个是mouseout
+            marker.addListener('mouseover', function() {
+                this.setIcon(highlightedIcon);
+            });
+            marker.addListener('mouseout', function() {
+                this.setIcon(defaultIcon);
+            });
+        }
+        //告诉地图融入这些边界
+        map.fitBounds(bounds);
+    }
+    
+    function populateInfowindow(marker,infowindow){
+        if(infowindow.marker != marker){
+            infowindow.marker = marker;
+            infowindow.setContent('<div>'+marker.title+'</div>');
+            infowindow.open(map,marker);
+            infowindow.addListener('closeclick',function(){
+                infowindow.setMarker = null;
+            });
+        }
+    }
+    //创建图标函数
+    function makeMarkerIcon(markerColor){
+        var markerImage = new google.maps.MarkerImage(
+          'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+          '|40|_|%E2%80%A2',
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(21,34));
+        return markerImage; 
+    }
+
+</script>
+<script  async defer 
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCpW60ml7-He7_pNbde7sxIld-SuKlEi0c&v=3&callback=initMap">
+</script>
+</body>
+</html>

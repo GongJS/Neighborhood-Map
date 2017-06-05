@@ -1,0 +1,48 @@
+locations:{[
+    {
+        name : 'water park',
+        address : '天津市南开区水上公园东路12号',
+        location : {
+            lat:39.08838,
+            lng:117.16958
+        },
+        title:'天津市水上公园'
+    },
+    {
+        name : 'museum',
+        address : '天津市河西区宾馆西路19号',
+        location : {
+            lat:39.08463,
+            lng:117.20243000000005
+        },
+        title:'天津市博物馆'
+    },
+    {
+        name : 'TJPU',
+        address : '天津市西青区宾水西道399号',
+        location : {
+            lat:39.131101838799914,
+            lng:117.23467800000006
+        },
+        title:'天津工业大学'
+    },
+    {
+        name : 'TJU',
+        address : '天津市南开区铭德道',
+        location : {
+            lat:39.11007502845973,
+            lng:117.169189453125
+        },
+        title:'天津大学'
+    },
+    {
+        name : 'people park',
+        address : '天津市河西区厦门路',
+        location : {
+            lat:39.10505,
+            lng:117.21753999999999
+        },
+        title:'天津市人民公园'
+    }
+    ]
+}
