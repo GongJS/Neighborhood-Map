@@ -21,8 +21,7 @@
             <input id="search" type="text" data-bind="textInput:inputData">
             <button id="filter" value="FILTER">FILTER</button>
             <ul class='listing' data-bind="foreach:locationList">
-                <li class='listing-item' data-bind="text:name, visible: showView, click:$parent.selectedLocation">
-                </li>
+                <li class='listing-item' data-bind="text:name, visible: showView, click:$parent.selectedLocation"></li>
             </ul>
         </div>
         <div id="map-view"></div>

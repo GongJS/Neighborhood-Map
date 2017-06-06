@@ -4,54 +4,49 @@ var model = {
     //定义五个地点信息
     locations:[
     {
-        name : 'water park',
-        category:"park",
-        address : '天津市南开区水上公园东路12号',
+        name : 'beijing',
+        address : '北京市',
         location : {
-            lat:39.08838,
-            lng:117.16958
+            lat:39.91667,
+            lng:116.41667
         },
-        title:'水上公园'
+        title:'Beijing'
     },
     {
-        name : 'museum',
-        category:"museum",
-        address : '天津市河西区宾馆西路19号',
+        name : 'tianjin',
+        address : '天津市',
         location : {
-            lat:39.08463,
-            lng:117.20243000000005
+            lat:39.13333,
+            lng:117.20000
         },
-        title:'天津市博物馆'
+        title:'Tianjin'
     },
     {
-        name : 'TJPU',
-        category:"university",
-        address : '天津市西青区宾水西道399号',
+        name : 'shanghai',
+        address : '上海市',
         location : {
-            lat:39.131101838799914,
-            lng:117.23467800000006
+            lat:31.22,
+            lng:121.48
         },
-        title:'天津工业大学'
+        title:'Shanghai'
     },
     {
-        name : 'TJU',
-        category:"university",
-        address : '天津市南开区铭德道',
+        name : 'chengdu',
+        address : '四川省成都市',
         location : {
-            lat:39.11007502845973,
-            lng:117.169189453125
+            lat:30.66667,
+            lng:104.06667
         },
-        title:'天津大学'
+        title:'Chengdu'
     },
     {
-        name : 'people park',
-        category:"park",
-        address : '天津市河西区厦门路',
+        name : 'nanjing',
+        address : '江苏省南京市',
         location : {
-            lat:39.10505,
-            lng:117.21753999999999
+            lat:32.05000,
+            lng:118.78333
         },
-        title:'人民公园'
+        title:'Nanjing'
     }
     ]
 };
@@ -77,12 +72,17 @@ var ViewModel = {
             var marker = this.marker;
             google.maps.event.trigger(marker, 'click');
         };
+        
+        model.locations.forEach(function(locat) {
+            var loc = new LOCATION(locat);
+            markers.push(loc);
+       });
         //监测输入的数据
         this.inputData = ko.observable('');
         //匹配地点
         this.filterName = ko.computed(function(){
             var filter = self.inputData();
-
+            
             for(var i=0;i<self.locationList().length;i++){
                 //首先判断locationlist是否包含所输入的内容
                 if(self.locationList()[i].name().includes(filter)===true){
@@ -135,7 +135,14 @@ var ViewModel = {
         function populateInfowindow(marker,infowindow){
         if(infowindow.marker != marker){
             infowindow.marker = marker;
-            infowindow.setContent('<div>'+marker.title+'</div>');
+            var content =  '<div class="title">' + marker.title + '</div>' 
+                        + '<a title="+' + marker.wikiUrl + '" href="' + marker.wikiUrl + '">' + "Wikipedia" + '</a>';
+            infowindow.setContent(content);
+            //设置标记动画
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(function() {
+                marker.setAnimation(null);
+            }, 700);
             infowindow.open(map,marker);
             infowindow.addListener('closeclick',function(){
                 infowindow.setMarker = null;
@@ -143,6 +150,30 @@ var ViewModel = {
         }}
     }
 }};
+//
+function LOCATION(data) {
+  this.name = data.name;
+  this.location = data.location;
+  this.marker = data.marker;
+  this.url = data.url;
+
+  var wikiUrl = "http://en.wikipedia.org/w/api.php?action=opensearch&search=" 
+                + data.name + "&format=json&callback=wikiCallback";
+
+  $.ajax({
+    url: wikiUrl,
+    dataType: "jsonp",
+    success: function(response) {
+      var articleList = response[0][0];
+      var url = articleList;
+      data.marker.wikiUrl = url;
+
+    },
+    error: function(error) {
+      console.log("wikipedia has failed to loaded");
+    }
+  })
+}
 //---------------------------VIEWMODEL--------------------------------
 var viewmodel = new ViewModel.init();
 ko.applyBindings(viewmodel);
