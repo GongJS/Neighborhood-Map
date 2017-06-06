@@ -100,7 +100,7 @@ var ViewModel = {
                 }
             }
         });
-        this.renderMarker = function(){
+        this.renderMarker = ko.computed(function(){
             var largeInfoWindow = new google.maps.InfoWindow();
             var bounds = new google.maps.LatLngBounds();
             var locations = model.locations;
@@ -125,23 +125,29 @@ var ViewModel = {
 
             bounds.extend(marker.position);
             //添加监听事件，是的marker被点击的时候，打开信息窗口，并包含wiki API
-            marker.addListener('click', function(){
-                populateInfowindow(this,largeInfoWindow)
+            marker.addListener('click', function(marker,largeInfoWindow){
+                // Wikipedia API
+                var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+ position +'&format=json&callback=wikiCallback';
+
+                $.ajax({
+                url: wikiUrl,
+                dataType: "jsonp"
+                }).done(function(response){
+                var article = response[1];
+                var url = '<div>'+ '<a href ="'+ article +'" target="_blank">'+ title +'</a></div>';
+                //给弹出的窗口设置内容
+                largeInfoWindow.setContent(url);
+                //打开内容窗口
+                largeInfoWindow.open(map, marker);
+                }).fail(function(){
+                largeInfoWindow.setContent('<em><br>'+ "Wikipedia data isn't loading"+'</em>');
+                largeInfoWindow.open(map, marker);
+                });
             });
         }    
         //告诉地图融入这些边界
         map.fitBounds(bounds);
-        //信息窗口函数
-        function populateInfowindow(marker,infowindow){
-        if(infowindow.marker != marker){
-            infowindow.marker = marker;
-            infowindow.setContent('<div>'+marker.title+'</div>');
-            infowindow.open(map,marker);
-            infowindow.addListener('closeclick',function(){
-                infowindow.setMarker = null;
-            });
-        }}
-    }
+    });
 }};
 //---------------------------VIEWMODEL--------------------------------
 var viewmodel = new ViewModel.init();
