@@ -109,12 +109,10 @@ var ViewModel = {
                 var position = locations[i].location;
                 var name = locations[i].name;
                 var title = locations[i].title;
-                var picture = locations[i].picture;
                 var marker = new google.maps.Marker({
                     map:map,
                     position:position,
                     title:title,
-                    picture:picture,
                     animation:google.maps.Animation.DROP,
                     id:i
             });
@@ -168,13 +166,13 @@ function LOCATION(data) {
     success: function(response) {
       var articleList = response[0][0];
       var url = articleList;
-      data.marker.wikiUrl = url;
-
+      data.wikiUrl = url;
     },
     error: function(error) {
       console.log("wikipedia has failed to loaded");
     }
-  })
+  });
+  //console.log(url);
 }
 //---------------------------VIEWMODEL--------------------------------
 var viewmodel = new ViewModel.init();
