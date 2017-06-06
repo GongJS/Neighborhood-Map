@@ -10,11 +10,7 @@ var model = {
             lat:39.91667,
             lng:116.41667
         },
-<<<<<<< HEAD
         title:'Beijing'
-=======
-        title:'水上公园'
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
     },
     {
         name : 'tianjin',
@@ -23,11 +19,7 @@ var model = {
             lat:39.13333,
             lng:117.20000
         },
-<<<<<<< HEAD
         title:'Tianjin'
-=======
-        title:'天津市博物馆'
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
     },
     {
         name : 'shanghai',
@@ -36,11 +28,7 @@ var model = {
             lat:31.22,
             lng:121.48
         },
-<<<<<<< HEAD
         title:'Shanghai'
-=======
-        title:'天津工业大学'
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
     },
     {
         name : 'chengdu',
@@ -49,11 +37,7 @@ var model = {
             lat:30.66667,
             lng:104.06667
         },
-<<<<<<< HEAD
         title:'Chengdu'
-=======
-        title:'天津大学'
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
     },
     {
         name : 'nanjing',
@@ -62,11 +46,7 @@ var model = {
             lat:32.05000,
             lng:118.78333
         },
-<<<<<<< HEAD
         title:'Nanjing'
-=======
-        title:'人民公园'
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
     }
     ]
 };
@@ -92,14 +72,11 @@ var ViewModel = {
             var marker = this.marker;
             google.maps.event.trigger(marker, 'click');
         };
-<<<<<<< HEAD
         
         model.locations.forEach(function(locat) {
             var loc = new LOCATION(locat);
             markers.push(loc);
        });
-=======
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
         //监测输入的数据
         this.inputData = ko.observable('');
         //匹配地点
@@ -123,11 +100,7 @@ var ViewModel = {
                 }
             }
         });
-<<<<<<< HEAD
         this.renderMarker = function(){
-=======
-        this.renderMarker = ko.computed(function(){
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
             var largeInfoWindow = new google.maps.InfoWindow();
             var bounds = new google.maps.LatLngBounds();
             var locations = model.locations;
@@ -154,34 +127,12 @@ var ViewModel = {
 
             bounds.extend(marker.position);
             //添加监听事件，是的marker被点击的时候，打开信息窗口，并包含wiki API
-<<<<<<< HEAD
             marker.addListener('click', function(){
                 populateInfowindow(this,largeInfoWindow)
-=======
-            marker.addListener('click', function(marker,largeInfoWindow){
-                // Wikipedia API
-                var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+ position +'&format=json&callback=wikiCallback';
-
-                $.ajax({
-                url: wikiUrl,
-                dataType: "jsonp"
-                }).done(function(response){
-                var article = response[1];
-                var url = '<div>'+ '<a href ="'+ article +'" target="_blank">'+ title +'</a></div>';
-                //给弹出的窗口设置内容
-                largeInfoWindow.setContent(url);
-                //打开内容窗口
-                largeInfoWindow.open(map, marker);
-                }).fail(function(){
-                largeInfoWindow.setContent('<em><br>'+ "Wikipedia data isn't loading"+'</em>');
-                largeInfoWindow.open(map, marker);
-                });
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
             });
         }    
         //告诉地图融入这些边界
         map.fitBounds(bounds);
-<<<<<<< HEAD
         //信息窗口函数
         function populateInfowindow(marker,infowindow){
         if(infowindow.marker != marker){
@@ -225,10 +176,6 @@ function LOCATION(data) {
     }
   })
 }
-=======
-    });
-}};
->>>>>>> 8d7e9079168e44f6a37091f869c8aa295a055488
 //---------------------------VIEWMODEL--------------------------------
 var viewmodel = new ViewModel.init();
 ko.applyBindings(viewmodel);
