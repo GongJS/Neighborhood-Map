@@ -21,16 +21,18 @@
             <input id="search" type="text" data-bind="textInput:inputData">
             <button id="filter" value="FILTER">FILTER</button>
             <ul class='listing' data-bind="foreach:locationList">
-                <li class='listing-item' data-bind="text:name, visible: showView, click:$parent.selectedLocation"></li>
+                <li class='listing-item' data-bind="text:name, visible: showView, click:$parent.selectedLocation">
+                </li>
             </ul>
         </div>
         <div id="map-view"></div>
     </div>
-    <script src="js/knockout-3.4.2.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
     <script src="js/script.js"></script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzynthQu2IRrCq6D5fMAcCtNnJSSpbuxY&callback=initMap"
-        onerror="googlError()">
+        onerror="googleError()">
     </script>
 </body>
 </html>

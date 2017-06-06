@@ -11,7 +11,6 @@ var model = {
             lat:39.08838,
             lng:117.16958
         },
-        status:ko.observable("OK"),
         title:'水上公园'
     },
     {
@@ -22,7 +21,6 @@ var model = {
             lat:39.08463,
             lng:117.20243000000005
         },
-        status:ko.observable("OK"),
         title:'天津市博物馆'
     },
     {
@@ -33,7 +31,6 @@ var model = {
             lat:39.131101838799914,
             lng:117.23467800000006
         },
-        status:ko.observable("OK"),
         title:'天津工业大学'
     },
     {
@@ -44,7 +41,6 @@ var model = {
             lat:39.11007502845973,
             lng:117.169189453125
         },
-        status:ko.observable("OK"),
         title:'天津大学'
     },
     {
@@ -55,7 +51,6 @@ var model = {
             lat:39.10505,
             lng:117.21753999999999
         },
-        status:ko.observable("OK"),
         title:'人民公园'
     }
     ]
@@ -78,46 +73,52 @@ var ViewModel = {
         model.locations.forEach(function(item){
             self.locationList.push(new view(item));
         });
-
         this.selectedLocation = function() {
             var marker = this.marker;
             google.maps.event.trigger(marker, 'click');
         };
-
+        //监测输入的数据
         this.inputData = ko.observable('');
+        //匹配地点
         this.filterName = ko.computed(function(){
             var filter = self.inputData();
 
             for(var i=0;i<self.locationList().length;i++){
-                //首先判断是否
+                //首先判断locationlist是否包含所输入的内容
                 if(self.locationList()[i].name().includes(filter)===true){
+                    //如果包含，那么显示list
                     self.locationList()[i].showView(true);
                     if(self.locationList()[i].marker !== undefined){
+                        //同时如果list存在，那么使标记也显示
                         self.locationList()[i].marker.setVisible(true);
                     }
                 }
                 else{
+                    //否则不包含的话，那么就将list和marker都设置成不显示
                     self.locationList()[i].showView(false);
                     self.locationList()[i].marker.setVisible(false);
                 }
             }
         });
-
-        this.renderMarker = function(){
+        this.renderMarker = ko.computed(function(){
             var largeInfoWindow = new google.maps.InfoWindow();
             var bounds = new google.maps.LatLngBounds();
             var locations = model.locations;
+            //循环赋值
             for(var i=0;i<locations.length;i++){
                 var position = locations[i].location;
                 var name = locations[i].name;
                 var title = locations[i].title;
+                var picture = locations[i].picture;
                 var marker = new google.maps.Marker({
                     map:map,
                     position:position,
                     title:title,
+                    picture:picture,
                     animation:google.maps.Animation.DROP,
                     id:i
             });
+            //将marker放进markers数组中
             markers.push(marker);
 
             self.locationList()[i].marker = marker;
@@ -125,47 +126,37 @@ var ViewModel = {
             marker.setMap(map);
 
             bounds.extend(marker.position);
+            //添加监听事件，是的marker被点击的时候，打开信息窗口，并包含wiki API
+            marker.addListener('click', function(marker,largeInfoWindow){
+                // Wikipedia API
+                var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+ position +'&format=json&callback=wikiCallback';
 
-            marker.addListener('click', function() {
-                populateInfoWindow(this, largeInfoWindow);
+                $.ajax({
+                url: wikiUrl,
+                dataType: "jsonp"
+                }).done(function(response){
+                var article = response[1];
+                var url = '<div>'+ '<a href ="'+ article +'" target="_blank">'+ title +'</a></div>';
+                //给弹出的窗口设置内容
+                largeInfoWindow.setContent(url);
+                //打开内容窗口
+                largeInfoWindow.open(map, marker);
+                }).fail(function(){
+                largeInfoWindow.setContent('<em><br>'+ "Wikipedia data isn't loading"+'</em>');
+                largeInfoWindow.open(map, marker);
+                });
             });
-        }
+        }    
         //告诉地图融入这些边界
         map.fitBounds(bounds);
-        function populateInfoWindow(marker,infowindow){
-            if(infowindow.marker != marker){
-            infowindow.marker = marker;
-            
-            infowindow.setContent('<div>'+marker.title+'</div>');
-            infowindow.open(map,marker);
-            infowindow.addListener('closeclick',function(){
-                infowindow.setMarker = null;
-            });
-        }}
-    }
-  }
-};
-//-----------------------------load FourSquare API--------------------------------
-var clientid = ;
-var clientsecret = ;
-var redirecturi = ;
-var remembercredentials = ;
-var client = new FourSquareClient("<clientid>", "<clientsecret>", "<redirecturi>", "<remembercredentials>");
-client.venuesClient.venues("<venue_id>", { 
-    onSuccess: function(data) { 
-    // do something with the response 
-    // actual object data is inside: data.response
-}, 
-    onFailure: function(data) {
-         // the request failed 
-}
-})
-//------------------------------
+    });
+}};
+//---------------------------VIEWMODEL--------------------------------
 var viewmodel = new ViewModel.init();
 ko.applyBindings(viewmodel);
 //callback调用的函数
 function initMap(){
-    map = new google.maps.Map(document.getElementById('map-view'),{
+   map = new google.maps.Map(document.getElementById('map-view'),{
         //设定地图显示的中心
         center:{
             lat:39.131101838799914,
@@ -179,7 +170,7 @@ function initMap(){
 }
 //错误处理函数
 function googleError(){
-    alert("Google maps API failed to load");
+    alert("Google maps API has failed to load.Please check your internet connection and try again later");
 }
 // 此处使用的地图样式使用的是课程中老师使用的样式.
 var styles = [
