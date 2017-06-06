@@ -164,8 +164,9 @@ function LOCATION(data) {
     url: wikiUrl,
     dataType: "jsonp",
     success: function(response) {
-      var articleList = response[0][0];
+      var articleList = response[3][0];
       var url = articleList;
+      console.log(url);
       data.wikiUrl = url;
     },
     error: function(error) {
