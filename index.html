@@ -14,19 +14,23 @@
             <h1>Neighborhood Map</h1>
         </div>
         <div id="location-listing-container">
-            <input id="search" type="text" data-bind="textInput:inputData">
+ <input id="search" type="text" data-bind="textInput:inputData">
             <button id="filter" value="FILTER">FILTER</button>
             <ul class='listing' data-bind="foreach:locationList">
-                <li class='listing-item' data-bind="text:name, visible: showView, click:$parent.selectedLocation">
-                </li>
-            </ul>
+                  <li class='listing-item' data-bind="text:name, visible: showView, click:$parent.selectedLocation">
+                  </li>
+              </ul>
         </div>
 <!-- 选定地图的div容器 -->
 <div id="map"></div>
 <!-- 异步加载 JavaScript API。-->
-<script src="http://webapi.amap.com/maps?v=1.3&key=744e3f2be69fdc880da686d6a7191255&callback=init"></script>
+
 <script src="js/jquery-3.2.1.js"></script>
 <script src="js/knockout-3.4.2.js"></script>
 <script src="js/script.js"></script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzynthQu2IRrCq6D5fMAcCtNnJSSpbuxY&callback=initMap"
+        onerror="googleError()">
+    </script>
 </body>
 </html>
