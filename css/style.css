@@ -14,13 +14,13 @@ html,body {
     height: 100%;
 }
 
-#title{
+.title{
     font-size: 20px;
     text-align: center;
 }
 
-#location-listing-container{
-    width: 20%;
+.location-listing-container{
+    width: 50%;
     height: 80%;
     float: left;
 }
