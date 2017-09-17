@@ -47,13 +47,16 @@ var model = [
         },
         title:'Nanjing'
     }
-    ]
+  ]
 
 
-  //定义地图
+//定义地图
 var map;
 //定义一个标记数组
 var markers = [];
+var googleMapRequestTimeout = setTimeout(function(){
+  alert("failed to get googleMap");
+},5000);
 //------------------View---------------------//
 var view = function(data){
     this.name = ko.observable(data.title);
@@ -61,35 +64,38 @@ var view = function(data){
 }
 //-----------------ViewModel----------------//
  var ViewModel = {
+  //初始化函数
    init : function(){
-       var self = this;
-
+      var self = this;
+       //把五个地点信息放入监控数组
        this.locationList = ko.observableArray([]);
        model.forEach(function(item){
            self.locationList.push(new view(item));
        });
-       this.selectedLocation = function() {
-           var marker1 = this.marker;
+
+       //列表里的地点增加监听事件，打开marker点信息
+       this.selectedLocation = function(marker) {
            google.maps.event.trigger(this.marker, 'click');
        };
 
+       //创建地图上的5个marker点
        model.forEach(function(locat) {
            var loc = new LOCATION(locat);
            markers.push(loc);
       });
-      //监测输入的数据
-     this.inputData = ko.observable('');
-     //匹配地点
-     this.filterName = ko.computed(function(){
-         var filter = self.inputData();
 
+      //监测输入的数据
+      this.inputData = ko.observable('');
+      //匹配地点
+      this.filterName = ko.computed(function(){
+         var filter = self.inputData();
          for(var i=0;i<self.locationList().length;i++){
-             //首先判断locationlist是否包含所输入的内容
+                 //首先判断locationlist是否包含所输入的内容
              if(self.locationList()[i].name().includes(filter)===true){
                  //如果包含，那么显示list
                  self.locationList()[i].showView(true);
                  if(self.locationList()[i].marker !== undefined){
-                     //同时如果list存在，那么使标记也显示
+                 //同时如果list存在，那么使标记也显示
                      self.locationList()[i].marker.setVisible(true);
                  }
              }
@@ -98,43 +104,43 @@ var view = function(data){
                  self.locationList()[i].showView(false);
                  self.locationList()[i].marker.setVisible(false);
              }
-         }
-     });
+           }
+      });
+      //marker渲染函数
       this.renderMarker = function(){
-                  var largeInfoWindow = new google.maps.InfoWindow();
-                  var bounds = new google.maps.LatLngBounds();
-                  var locations = model;
-                  //循环赋值
-                  for(var i=0;i<locations.length;i++){
-                      var position = locations[i].location;
-                      var name = locations[i].name;
-                      var title = locations[i].title;
-                      var marker = new google.maps.Marker({
-                          map:map,
-                          position:position,
-                          title:title,
-                          animation:google.maps.Animation.DROP,
-                          id:i
-                  });
-                  //将marker放进markers数组中
-                  markers.push(marker);
-
-                  self.locationList()[i].marker = marker;
-
-                  marker.setMap(map);
-
-                  bounds.extend(marker.position);
-                  //添加监听事件，是的marker被点击的时候，打开信息窗口，并包含wiki API
-                  marker.addListener('click', function(){
-                                 populateInfowindow(this,largeInfoWindow)
-              });
-            }
-              //告诉地图融入这些边界
-              map.fitBounds(bounds);
-              function populateInfowindow(marker,infowindow){
-       if(infowindow.marker != marker){
+          var largeInfoWindow = new google.maps.InfoWindow();
+          var bounds = new google.maps.LatLngBounds();
+          var locations = model;
+          //循环赋值
+          for(var i=0;i<locations.length;i++){
+              var position = locations[i].location;
+              var name = locations[i].name;
+              var title = locations[i].title;
+          //生成marker点
+              var marker = new google.maps.Marker({
+                  map:map,
+                  position:position,
+                  title:title,
+                  animation:google.maps.Animation.DROP,
+                  id:i
+          });
+          //将marker放进markers数组中
+          markers.push(marker);
+          self.locationList()[i].marker = marker;
+          marker.setMap(map);
+          bounds.extend(marker.position);
+          //添加监听事件，是的marker被点击的时候，打开信息窗口，并包含wiki链接
+          marker.addListener('click', function(){
+                populateInfowindow(this,largeInfoWindow)
+            });
+          }
+          //告诉地图融入这些边界
+          map.fitBounds(bounds);
+          function populateInfowindow(marker,infowindow){
+          if(infowindow.marker != marker){
            infowindow.marker = marker;
            cityurl = 'https://en.wikipedia.org/wiki/'
+           //生成访问网址
            var content = '<div class="title">' + marker.title + '</div>'
                        + '<li><a href="https://en.wikipedia.org/wiki/'+marker.title+'">'+marker.title+'</a></li>';
            infowindow.setContent(content);
@@ -142,24 +148,30 @@ var view = function(data){
            marker.setAnimation(google.maps.Animation.BOUNCE);
            setTimeout(function() {
                marker.setAnimation(null);
-           }, 700);
+           }, 500);
            infowindow.open(map,marker);
            infowindow.addListener('closeclick',function(){
-               infowindow.setMarker = null;
+           infowindow.setMarker = null;
            });
-       }}
+          }
+        }
+      }
     }
- }
- }
+  }
+
+  //每个marker点增加wiki链接
  function LOCATION(data) {
   this.name = data.name;
   this.location = data.location;
   this.marker = data.marker;
   this.url = data.url;
+  var wikiUrl = "http://en.wikipedia.org/w/api.php?action=opensearch&search="+ data.name + "&format=json&callback=wikiCallback";
+  //wiki加载失败函数
+  var wikeRequestTimeout = setTimeout(function(){
+    alert("failed to get wikipedia resources");
+  },5000);
 
-  var wikiUrl = "http://en.wikipedia.org/w/api.php?action=opensearch&search="
-                + data.name + "&format=json&callback=wikiCallback";
-
+  //发起访问
   $.ajax({
     url: wikiUrl,
     dataType: "jsonp",
@@ -168,17 +180,18 @@ var view = function(data){
       var url = articleList;
       console.log(url);
       data.wikiUrl = url;
-    },
-    error: function(error) {
-      console.log("wikipedia has failed to loaded");
+      //清除wiki加载失败函数
+      clearTimeout(wikeRequestTimeout);
     }
   });
-  //console.log(url);
-}
+ }
+
+ //-----------------初始化ViewModel----------------//
   var viewmodel = new ViewModel.init();
   ko.applyBindings(viewmodel);
 
- function initMap(){
+   //-----------------初始化google map----------------//
+  function initMap(){
    map = new google.maps.Map(document.getElementById('map'),{
         //设定地图显示的中心
         center:{
@@ -188,9 +201,9 @@ var view = function(data){
         //设置缩放值
         zoom:15,
     });
-   viewmodel.renderMarker();
-}
-//错误处理函数
-function googleError(){
-    alert("Google maps API has failed to load.Please check your internet connection and try again later");
-}
+    viewmodel.renderMarker();
+  }
+  //googleMap加载失败处理函数
+  function googleError(){
+      alert("Google maps API has failed to load");
+  }
